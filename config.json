@@ -27,7 +27,15 @@
 				"description": "BeagleConnect Freedom based on Ti CC1352P7",
 				"icon": "https://media.githubusercontent.com/media/beagleboard/bb-imager-rs/refs/heads/main/assets/boards/bcf.png",
 				"flasher": "BeagleConnectFreedom",
-				"documentation": "https://docs.beagleboard.org/latest/boards/beagleconnect/freedom/index.html"
+				"documentation": "https://docs.beagleboard.org/latest/boards/beagleconnect/freedom/index.html",
+				"oshw": "us002175",
+				"specification": {
+					"Processor": "Texas Instruments CC1352P7, Texas Instruments MSP430",
+					"Cores": "1 x 48MHz ARM® Cortex-M4F",
+					"Onboard Flash": "704KB",
+					"External Flash": "2MB SPI flash",
+					"Sensors": "TI OPT3001 light sensor, TI HDC2010 humidity/temperature sensor"
+				}
 			},
 			{
 				"name": "BeagleY-AI",
@@ -37,7 +45,14 @@
 				"description": "BeagleY-AI based on TI AM67A",
 				"icon": "https://media.githubusercontent.com/media/beagleboard/bb-imager-rs/refs/heads/main/assets/boards/beagley.png",
 				"flasher": "SdCard",
-				"documentation": "https://docs.beagleboard.org/boards/beagley/ai/index.html#beagley-ai-home"
+				"documentation": "https://docs.beagleboard.org/boards/beagley/ai/index.html#beagley-ai-home",
+				"oshw": "us002616",
+				"specification": {
+					"Processor": "Texas Instruments AM67A",
+					"Cores": "4 x 1.4GHz ARM® Cortex-A53 (64-bit), 2 x ARM® Cortex-R5F",
+					"GPU": "IMG BXS-4-64",
+					"RAM": "4GB LPDDR4"
+				}
 			},
 			{
 				"name": "BeaglePlay",
@@ -47,7 +62,14 @@
 				"description": "BeaglePlay and other boards based on TI AM62",
 				"icon": "https://media.githubusercontent.com/media/beagleboard/bb-imager-rs/refs/heads/main/assets/boards/beagleplay.png",
 				"flasher": "SdCard",
-				"documentation": "https://docs.beagleboard.org/boards/beagleplay/index.html#beagleplay-home"
+				"documentation": "https://docs.beagleboard.org/boards/beagleplay/index.html#beagleplay-home",
+				"oshw": "us002174",
+				"specification": {
+					"Processor": "Texas Instruments AM6254, Texas Instruments CC1352P7",
+					"Cores": "4 x 1.4GHz ARM® Cortex-A53 (64-bit), 1 x 400MHz ARM® Cortex-M4F, 1 x 48MHz ARM® Cortex-M4F",
+					"GPU": "PowerVR® Rogue™ AXE-1-16M",
+					"RAM": "2GB DDR4"
+				}
 			},
 			{
 				"name": "BeagleBone AI-64",
@@ -57,7 +79,15 @@
 				"description": "BeagleBone AI-64 based on TI TDA4VM",
 				"icon": "https://media.githubusercontent.com/media/beagleboard/bb-imager-rs/refs/heads/main/assets/boards/ai64.png",
 				"flasher": "SdCard",
-				"documentation": "https://docs.beagleboard.org/boards/beaglebone/ai-64/index.html#bbai64-home"
+				"documentation": "https://docs.beagleboard.org/boards/beaglebone/ai-64/index.html#bbai64-home",
+				"oshw": "us002120",
+				"specification": {
+					"Processor": "Texas Instruments TDA4VM",
+					"Cores": "2 x ARM® Cortex-A72 (64-bit), 6 x ARM® Cortex-R5F",
+					"GPU": "PowerVR Rogue 8XE GE8430",
+					"RAM": "1GB LPDDR4",
+					"Onboard Flash": "16GB Kingston eMMC"
+				}
 			},
 			{
 				"name": "BeagleV-Fire",
@@ -68,7 +98,14 @@
 				"icon": "https://media.githubusercontent.com/media/beagleboard/bb-imager-rs/refs/heads/main/assets/boards/beaglevfire.png",
 				"flasher": "SdCard",
 				"documentation": "https://docs.beagleboard.org/boards/beaglev/fire/index.html#beaglev-fire-home",
-				"instructions": "1. Connect the BeagleV-Fire board to your computer via USB.\n2. While powering on the board, click the USER button on the board as soon as you power it on.\n3. BeagleV-Fire must appear as a USB device in the destination list."
+				"instructions": "1. Connect the BeagleV-Fire board to your computer via USB.\n2. While powering on the board, click the USER button on the board as soon as you power it on.\n3. BeagleV-Fire must appear as a USB device in the destination list.",
+				"oshw": "us002572",
+				"specification": {
+					"Processor": "Microchip® Polarfire® MPFS025T",
+					"Cores": "1x 64-bit RV64IMAC monitor/boot core (E51), 4x 64-bit RV64GC Application cores (U54-MC)",
+					"RAM": "1GB LPDDR4",
+					"Onboard Flash": "16GB Kingston eMMC"
+				}
 			},
 			{
 				"name": "BeagleBone Black",
@@ -78,7 +115,15 @@
 				"description": "BeagleBone Black and other boards based on TI AM335",
 				"icon": "https://media.githubusercontent.com/media/beagleboard/bb-imager-rs/refs/heads/main/assets/boards/bbb.png",
 				"flasher": "SdCard",
-				"documentation": "https://docs.beagleboard.org/boards/beaglebone/black/index.html#beagleboneblack-home"
+				"documentation": "https://docs.beagleboard.org/boards/beaglebone/black/index.html#beagleboneblack-home",
+				"oshw": "us000236",
+				"specification": {
+					"Processor": "Texas Instruments AM3358",
+					"Cores": "1GHz ARM® Cortex-A8",
+					"GPU": "PowerVR Rogue 8XE GE8430",
+					"RAM": "512MB DDR3L",
+					"Onboard Flash": "4GB, 8bit eMMC"
+				}
 			},
 			{
 				"name": "PocketBeagle 2",
@@ -88,7 +133,14 @@
 				"description": "PocketBeagle 2 and other boards based on TI AM62",
 				"icon": "https://media.githubusercontent.com/media/beagleboard/bb-imager-rs/refs/heads/main/assets/boards/pocket2.png",
 				"flasher": "SdCard",
-				"documentation": "https://docs.beagleboard.org/boards/pocketbeagle-2/index.html"
+				"documentation": "https://docs.beagleboard.org/boards/pocketbeagle-2/index.html",
+				"oshw": "us002717",
+				"specification": {
+					"Processor": "Texas Instruments AM6254",
+					"Cores": "4 x 1.4GHz ARM® Cortex-A53 (64-bit), 1 x 400MHz ARM® Cortex-M4F",
+					"GPU": "PowerVR® Rogue™ AXE-1-16M",
+					"RAM": "512MB DDR4"
+				}
 			}
 		]
 	},

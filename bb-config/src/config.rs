@@ -68,6 +68,12 @@ pub struct Device {
     pub documentation: Option<Url>,
     /// Special Instructions for flashing board.
     pub instructions: Option<String>,
+    #[serde(default)]
+    #[serde(with = "tuple_vec_map")]
+    /// Board Specification. With order preserved
+    pub specification: Vec<(String, String)>,
+    /// OSHW details for the device.
+    pub oshw: Option<String>
 }
 
 /// Types of customization Initialization formats
@@ -86,6 +92,7 @@ pub enum InitFormat {
 /// Os List can contain multiple types of items depending on the situation.
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq)]
 #[serde(untagged)]
+#[allow(clippy::large_enum_variant)]
 pub enum OsListItem {
     /// Single Os Image
     Image(OsImage),
@@ -150,6 +157,8 @@ pub struct OsImage {
     pub icon: Url,
     /// Os Image download URL
     pub url: Url,
+    /// Os Image size before download
+    pub image_download_size: Option<u64>,
     /// Os Image sha256 (before extraction)
     #[serde(with = "const_hex")]
     pub image_download_sha256: [u8; 32],
@@ -229,11 +238,11 @@ impl Extend<Self> for Config {
 }
 
 impl OsListItem {
-    pub fn icon(&self) -> url::Url {
+    pub fn icon(&self) -> &url::Url {
         match self {
-            OsListItem::Image(img) => img.icon.clone(),
-            OsListItem::SubList(img) => img.icon.clone(),
-            OsListItem::RemoteSubList(img) => img.icon.clone(),
+            OsListItem::Image(img) => &img.icon,
+            OsListItem::SubList(img) => &img.icon,
+            OsListItem::RemoteSubList(img) => &img.icon,
         }
     }
 

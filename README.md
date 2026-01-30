@@ -18,9 +18,13 @@ See [config.json](config.json) for example.
 
 # GUI
 
-![BBImager Home Screen](assets/screenshots/home.webp)
-![BBImager Configuration Screen](assets/screenshots/config.webp)
-![BBImager Flashing Screen](assets/screenshots/flash.webp)
+![BBImager Home Screen](./assets/screenshots/1_board_selection.webp)
+![BBImager Image Selection Screen](./assets/screenshots/2_image_selection.webp)
+![BBImager Destination Screen](./assets/screenshots/3_dest_selection.webp)
+![BBImager Configuration Screen](./assets/screenshots/4_custmization.webp)
+![BBImager Review Screen](./assets/screenshots/5_review.webp)
+![BBImager Flashing Screen](./assets/screenshots/6_flashing.webp)
+![BBImager Flashing Finish Screen](./assets/screenshots/7_sucess.webp)
 
 # CLI
 

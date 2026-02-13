@@ -23,6 +23,8 @@ tokio = { version = "1.49", default-features = false, features = ["rt-multi-thre
 tokio-util = { version = "0.7" }
 bb-helper = { path = "../bb-helper", features = ["resolvable"] }
 anyhow = "1.0"
+toml = "1.0.3"
+serde = { version = "1.0.228", features = ["derive"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 udisks2 = { version = "0.3", optional = true }

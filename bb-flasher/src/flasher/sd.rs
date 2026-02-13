@@ -4,9 +4,12 @@
 //!
 //! [BeagleBoard.org]: https://www.beagleboard.org/
 
-use std::{borrow::Cow, fmt::Display, path::PathBuf};
-
 use crate::{BBFlasher, BBFlasherTarget, DownloadFlashingStatus, Resolvable};
+pub use bb_flasher_sd::{
+    RaspberryCustomization, RaspberryLocale, RaspberrySsh, RaspberrySystem, RaspberryUser,
+    RaspberryWlan,
+};
+use std::{borrow::Cow, fmt::Display, path::PathBuf};
 
 /// SD Card
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
@@ -69,6 +72,12 @@ pub struct FlashingSdLinuxConfig {
 }
 
 impl FlashingSdLinuxConfig {
+    pub const fn raspberry(customization: RaspberryCustomization) -> Self {
+        Self {
+            customization: Some(bb_flasher_sd::Customization::Raspberry(customization)),
+        }
+    }
+
     pub const fn sysconfig(
         hostname: Option<Box<str>>,
         timezone: Option<Box<str>>,

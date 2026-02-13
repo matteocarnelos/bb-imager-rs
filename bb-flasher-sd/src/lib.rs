@@ -47,7 +47,10 @@ mod flashing;
 mod helpers;
 pub(crate) mod pal;
 
-pub use customization::{Customization, SysconfCustomization};
+pub use customization::{
+    Customization, RaspberryCustomization, RaspberryLocale, RaspberrySsh, RaspberrySystem,
+    RaspberryUser, RaspberryWlan, SysconfCustomization,
+};
 pub use flashing::flash;
 
 pub(crate) type Result<T, E = Error> = std::result::Result<T, E>;
@@ -63,6 +66,16 @@ pub enum Error {
     InvalidPartitionTable,
     #[error("Only FAT BOOT partitions are supported.")]
     InvalidBootPartition,
+    #[error("Failed to create custom.toml.")]
+    RaspberryCreateFail {
+        #[source]
+        source: io::Error,
+    },
+    #[error("Failed to write to custom.toml.")]
+    RaspberryWriteFail {
+        #[source]
+        source: io::Error,
+    },
     #[error("Failed to create sysconf.txt")]
     SysconfCreateFail {
         #[source]

@@ -1,23 +1,100 @@
-use std::io::{Read, Seek, SeekFrom, Write};
-
 use crate::{Error, Result};
+use fatfs::FileSystem;
+use fscommon::{BufStream, StreamSlice};
+use serde::Serialize;
+use std::io::{Read, Seek, SeekFrom, Write};
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum Customization {
     Sysconf(SysconfCustomization),
+    Raspberry(RaspberryCustomization),
 }
 
 impl Customization {
     pub(crate) fn customize(&self, dst: impl Write + Seek + Read + std::fmt::Debug) -> Result<()> {
         match self {
             Self::Sysconf(x) => x.customize(dst),
+            Self::Raspberry(x) => x.customize(dst),
         }
     }
 
     pub(crate) fn validate(&self) -> bool {
         match self {
             Self::Sysconf(x) => x.validate(),
+            Self::Raspberry(x) => x.validate(),
         }
+    }
+}
+
+/// Post install customization options
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, Serialize)]
+pub struct RaspberryCustomization {
+    pub system: Option<RaspberrySystem>,
+    pub user: Option<RaspberryUser>,
+    pub ssh: Option<RaspberrySsh>,
+    pub wlan: Option<RaspberryWlan>,
+    pub locale: Option<RaspberryLocale>,
+}
+
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, Serialize)]
+pub struct RaspberrySystem {
+    pub hostname: Option<String>,
+}
+
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, Serialize)]
+pub struct RaspberryUser {
+    pub name: Option<String>,
+    pub password: Option<String>,
+    pub password_encrypted: Option<bool>,
+}
+
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, Serialize)]
+pub struct RaspberrySsh {
+    pub enabled: Option<bool>,
+    pub password_authentication: Option<bool>,
+    pub authorized_keys: Option<Vec<String>>,
+    pub ssh_import_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, Serialize)]
+pub struct RaspberryWlan {
+    pub ssid: Option<String>,
+    pub password: Option<String>,
+    pub password_encrypted: Option<bool>,
+    pub hidden: Option<bool>,
+    pub country: Option<String>,
+}
+
+#[derive(Clone, Debug, Default, Hash, PartialEq, Eq, Serialize)]
+pub struct RaspberryLocale {
+    pub keymap: Option<String>,
+    pub timezone: Option<String>,
+}
+
+impl RaspberryCustomization {
+    pub(crate) fn customize(
+        &self,
+        mut dst: impl Write + Seek + Read + std::fmt::Debug,
+    ) -> Result<()> {
+        let boot_partition = customization_partition(&mut dst)?;
+        let boot_root = boot_partition.root_dir();
+
+        let mut conf = boot_root
+            .create_file("custom.toml")
+            .map_err(|source| Error::RaspberryCreateFail { source })?;
+        conf.seek(SeekFrom::End(0))
+            .expect("Failed to seek to end of custom.toml");
+
+        conf.write_all("config_version = 1\n\n".as_bytes())
+            .map_err(|source| Error::RaspberryWriteFail { source })?;
+        conf.write_all(toml::to_string(self).unwrap().as_bytes())
+            .map_err(|source| Error::RaspberryWriteFail { source })?;
+
+        Ok(())
+    }
+
+    pub(crate) fn validate(&self) -> bool {
+        !matches!(&self.user, Some(RaspberryUser { name: Some(x),.. }) if x == "root")
     }
 }
 
@@ -42,15 +119,7 @@ impl SysconfCustomization {
             return Ok(());
         }
 
-        let boot_partition = {
-            let (start_off, end_off) = customization_partition(&mut dst)?;
-            let slice = fscommon::StreamSlice::new(dst, start_off, end_off)
-                .map_err(|_| Error::InvalidPartitionTable)?;
-            let boot_stream = fscommon::BufStream::new(slice);
-            fatfs::FileSystem::new(boot_stream, fatfs::FsOptions::new())
-                .map_err(|_| Error::InvalidBootPartition)?
-        };
-
+        let boot_partition = customization_partition(&mut dst)?;
         let boot_root = boot_partition.root_dir();
 
         let mut conf = boot_root
@@ -130,11 +199,11 @@ fn sysconf_w(mut sysconf: impl Write, key: &'static str, value: &str) -> Result<
         })
 }
 
-fn customization_partition(
-    mut dst: impl Write + Seek + Read + std::fmt::Debug,
-) -> Result<(u64, u64)> {
+fn customization_partition<T: Write + Seek + Read + std::fmt::Debug>(
+    mut dst: T,
+) -> Result<FileSystem<BufStream<StreamSlice<T>>>> {
     // First try GPT partition table. If that fails, try MBR
-    if let Ok(disk) = gpt::GptConfig::new()
+    let (start_offset, end_offset) = if let Ok(disk) = gpt::GptConfig::new()
         .writable(false)
         .open_from_device(&mut dst)
     {
@@ -144,7 +213,7 @@ fn customization_partition(
         let start_offset: u64 = partition_2.first_lba * gpt::disk::DEFAULT_SECTOR_SIZE.as_u64();
         let end_offset: u64 = partition_2.last_lba * gpt::disk::DEFAULT_SECTOR_SIZE.as_u64();
 
-        Ok((start_offset, end_offset))
+        (start_offset, end_offset)
     } else {
         let mbr =
             mbrman::MBRHeader::read_from(&mut dst).map_err(|_| Error::InvalidPartitionTable)?;
@@ -153,6 +222,11 @@ fn customization_partition(
         let start_offset: u64 = (boot_part.starting_lba * 512).into();
         let end_offset: u64 = start_offset + u64::from(boot_part.sectors) * 512;
 
-        Ok((start_offset, end_offset))
-    }
+        (start_offset, end_offset)
+    };
+
+    let slice = StreamSlice::new(dst, start_offset, end_offset)
+        .map_err(|_| Error::InvalidPartitionTable)?;
+    let boot_stream = BufStream::new(slice);
+    FileSystem::new(boot_stream, fatfs::FsOptions::new()).map_err(|_| Error::InvalidBootPartition)
 }

@@ -69,6 +69,14 @@ pub struct FlashingSdLinuxConfig {
 }
 
 impl FlashingSdLinuxConfig {
+    pub const fn raspberry_custom(hostname: Option<Box<str>>) -> Self {
+        Self {
+            customization: Some(bb_flasher_sd::Customization::RaspberryCustom(
+                bb_flasher_sd::RaspberryCustomCustomization { hostname },
+            )),
+        }
+    }
+
     pub const fn sysconfig(
         hostname: Option<Box<str>>,
         timezone: Option<Box<str>>,

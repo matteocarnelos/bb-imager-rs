@@ -2,7 +2,10 @@
 
 use iced::Task;
 
-use crate::{BBImager, helpers};
+use crate::{
+    BBImager, helpers,
+    state::{OverlayData, OverlayState},
+};
 
 #[derive(Debug, Clone)]
 pub(crate) enum BBImagerMessage {
@@ -213,6 +216,21 @@ pub(crate) fn update(state: &mut BBImager, message: BBImagerMessage) -> Task<BBI
                     }
                     BBImager::FlashingCancel(inner.into())
                 }
+                BBImager::AppInfo(inner) => match inner.page {
+                    OverlayData::Flashing(flashing_state) => {
+                        flashing_state.cancel_flashing.abort();
+
+                        if flashing_state.is_download {
+                            msg = "Download cancelled by user";
+                        }
+
+                        BBImager::AppInfo(OverlayState {
+                            page: OverlayData::FlashingCancel(flashing_state.into()),
+                            ..inner
+                        })
+                    }
+                    _ => panic!("Unexpected message"),
+                },
                 _ => panic!("Unexpected message"),
             };
 
@@ -224,15 +242,15 @@ pub(crate) fn update(state: &mut BBImager, message: BBImagerMessage) -> Task<BBI
         BBImagerMessage::FlashFail(err) => {
             let mut msg = "Flashing failed";
 
+            let logs =
+                std::fs::read_to_string(helpers::log_file_path()).expect("Failed to read logs");
+            let logs = iced::widget::text_editor::Content::with_text(&logs);
+
             *state = match std::mem::take(state) {
                 BBImager::Flashing(inner) => {
                     if inner.is_download {
                         msg = "Download failed";
                     }
-
-                    let logs = std::fs::read_to_string(helpers::log_file_path())
-                        .expect("Failed to read logs");
-                    let logs = iced::widget::text_editor::Content::with_text(&logs);
 
                     BBImager::FlashingFail(crate::state::FlashingFailState {
                         common: inner.common,
@@ -240,6 +258,23 @@ pub(crate) fn update(state: &mut BBImager, message: BBImagerMessage) -> Task<BBI
                         logs,
                     })
                 }
+                BBImager::AppInfo(inner) => match inner.page {
+                    OverlayData::Flashing(flashing_state) => {
+                        if flashing_state.is_download {
+                            msg = "Download failed";
+                        }
+
+                        BBImager::AppInfo(OverlayState {
+                            page: OverlayData::FlashingFail(crate::state::FlashingFailState {
+                                common: flashing_state.common,
+                                err,
+                                logs,
+                            }),
+                            ..inner
+                        })
+                    }
+                    _ => panic!("Unexpected message"),
+                },
                 _ => panic!("Unexpected message"),
             };
 
@@ -249,6 +284,10 @@ pub(crate) fn update(state: &mut BBImager, message: BBImagerMessage) -> Task<BBI
             BBImager::Flashing(inner) => {
                 inner.progress_update(x);
             }
+            BBImager::AppInfo(inner) => match &mut inner.page {
+                OverlayData::Flashing(flashing_state) => flashing_state.progress_update(x),
+                _ => panic!("Unexpected message"),
+            },
             _ => panic!("Unexpected message"),
         },
         BBImagerMessage::FlashStart => {
@@ -264,6 +303,19 @@ pub(crate) fn update(state: &mut BBImager, message: BBImagerMessage) -> Task<BBI
                     }
                     BBImager::FlashingSuccess(inner.into())
                 }
+                BBImager::AppInfo(inner) => match inner.page {
+                    OverlayData::Flashing(flashing_state) => {
+                        if flashing_state.is_download {
+                            msg = "Download finished successfully";
+                        }
+
+                        BBImager::AppInfo(OverlayState {
+                            page: OverlayData::FlashingSuccess(flashing_state.into()),
+                            ..inner
+                        })
+                    }
+                    _ => panic!("Unexpected message"),
+                },
                 _ => panic!("Unexpected message"),
             };
 

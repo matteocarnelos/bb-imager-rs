@@ -1,7 +1,9 @@
 use iced::{Element, widget};
 
 use crate::{
-    message::BBImagerMessage, state::OverlayState, ui::helpers::{element_with_label, page_type3, selectable_text}
+    message::BBImagerMessage,
+    state::OverlayState,
+    ui::helpers::{VIEW_COL_PADDING, element_with_label, page_type3, selectable_text},
 };
 
 const INP_BOX_WIDTH: u32 = 420;
@@ -41,6 +43,7 @@ fn review_view<'a>(state: &'a OverlayState) -> Element<'a, BBImagerMessage> {
         widget::container(selectable_text(&state.license)).padding(iced::Padding::ZERO.right(16))
     ]
     .spacing(8)
+    .padding(VIEW_COL_PADDING)
     .width(iced::Fill)
     .align_x(iced::Center);
 

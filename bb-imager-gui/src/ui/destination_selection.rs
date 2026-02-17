@@ -4,7 +4,13 @@ use iced::{
 };
 
 use crate::{
-    BBImagerMessage, constants, helpers::DestinationItem, state::ChooseDestState, ui::helpers::{card_btn_style, detail_entry, page_type1, svg_icon_style}
+    BBImagerMessage, constants,
+    helpers::DestinationItem,
+    state::ChooseDestState,
+    ui::helpers::{
+        LIST_COL_PADDING, VIEW_COL_PADDING, card_btn_style, detail_entry, page_type1,
+        svg_icon_style,
+    },
 };
 
 const ICON_WIDTH: u32 = 60;
@@ -72,7 +78,7 @@ fn dest_list_pane<'a>(state: &'a ChooseDestState) -> Element<'a, BBImagerMessage
             .into_iter()
             .chain(items),
         )
-        .padding(iced::Padding::ZERO.right(12)),
+        .padding(LIST_COL_PADDING),
     )
     .into()
 }
@@ -92,8 +98,7 @@ fn dest_view_pane<'a>(state: &'a crate::state::ChooseDestState) -> Element<'a, B
                     .size(24)
                     .align_x(iced::alignment::Alignment::Center)
                     .width(iced::Length::Fill),
-            ]
-            .spacing(16);
+            ];
 
             let col = col.extend(
                 dest.details()
@@ -102,7 +107,7 @@ fn dest_view_pane<'a>(state: &'a crate::state::ChooseDestState) -> Element<'a, B
                     .map(Into::into),
             );
 
-            widget::scrollable(col).into()
+            widget::scrollable(col.spacing(16).padding(VIEW_COL_PADDING)).into()
         }
         None => {
             let col = widget::column![
@@ -111,8 +116,7 @@ fn dest_view_pane<'a>(state: &'a crate::state::ChooseDestState) -> Element<'a, B
                     .width(iced::Fill)
                     .align_x(iced::Center)
                     .font(constants::FONT_BOLD)
-            ]
-            .spacing(16);
+            ];
 
             let col = match state.instruction() {
                 Some(x) => col.extend([
@@ -126,7 +130,10 @@ fn dest_view_pane<'a>(state: &'a crate::state::ChooseDestState) -> Element<'a, B
                 None => col,
             };
 
-            widget::center(widget::scrollable(col)).into()
+            widget::center(widget::scrollable(
+                col.padding(VIEW_COL_PADDING).spacing(16),
+            ))
+            .into()
         }
     }
 }

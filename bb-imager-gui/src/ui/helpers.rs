@@ -7,6 +7,12 @@ use iced::{
 
 use crate::{constants, message::BBImagerMessage};
 
+pub(crate) const VIEW_COL_PADDING: u16 = 16;
+pub(crate) const LIST_COL_PADDING: iced::Padding = iced::Padding {
+    right: 16.0,
+    ..iced::Padding::ZERO
+};
+
 pub(crate) fn card_btn_style(
     theme: &iced::Theme,
     status: widget::button::Status,
@@ -288,7 +294,7 @@ pub(crate) fn board_view_pane<'a>(
 
     let cols = cols.push(widget::center(widget::row(btns).spacing(16)));
 
-    widget::scrollable(cols).into()
+    widget::scrollable(cols.padding(VIEW_COL_PADDING)).into()
 }
 
 #[derive(Debug)]
@@ -392,13 +398,11 @@ pub(crate) fn selectable_text(
 fn card_box<'a>(
     content: impl Into<Element<'a, BBImagerMessage>>,
 ) -> widget::Container<'a, BBImagerMessage> {
-    widget::container(content)
-        .style(|_| {
-            widget::container::Style::default()
-                .background(constants::CARD)
-                .border(iced::border::rounded(8))
-        })
-        .padding(16)
+    widget::container(content).style(|_| {
+        widget::container::Style::default()
+            .background(constants::CARD)
+            .border(iced::border::rounded(8))
+    })
 }
 
 fn info_btn(handle: widget::svg::Handle) -> widget::Button<'static, BBImagerMessage> {

@@ -6,7 +6,7 @@ use iced::{
 use crate::{
     BBImagerMessage, constants,
     state::FlashingFinishState,
-    ui::helpers::{CircleBar, board_view_pane, page_type1},
+    ui::helpers::{CircleBar, VIEW_COL_PADDING, board_view_pane, page_type1},
 };
 
 pub(crate) fn view(state: &FlashingFinishState) -> Element<'_, BBImagerMessage> {
@@ -26,7 +26,7 @@ pub(crate) fn progress_view() -> Element<'static, BBImagerMessage> {
         widget::text("Flashing Cancelled by the user")
     ]
     .align_x(iced::Center)
-    .padding(16)
+    .padding(VIEW_COL_PADDING)
     .into()
 }
 

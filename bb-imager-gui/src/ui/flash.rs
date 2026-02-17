@@ -6,7 +6,7 @@ use iced::{
 use crate::{
     BBImagerMessage, constants,
     state::FlashingState,
-    ui::helpers::{self, ProgressCircle, detail_entry, page_type1},
+    ui::helpers::{self, ProgressCircle, VIEW_COL_PADDING, detail_entry, page_type1},
 };
 
 pub(crate) fn view(state: &FlashingState) -> Element<'_, BBImagerMessage> {
@@ -31,19 +31,15 @@ pub(crate) fn progress_view(state: &FlashingState) -> Element<'_, BBImagerMessag
 
     let progress = ProgressCircle::new(prog, 10.0, constants::TONGUE_ORANGE);
 
-    let col = widget::column![progress, widget::text(label)]
-        .align_x(iced::Center)
-        .padding(16);
-
-    let col = match state.time_remaining() {
-        Some(x) => col.push(detail_entry(
+    let mut col = widget::column![progress, widget::text(label)];
+    if let Some(x) = state.time_remaining() {
+        col = col.push(detail_entry(
             "Time Remaining",
             crate::helpers::pretty_duration(x),
-        )),
-        None => col,
-    };
+        ));
+    }
 
-    col.into()
+    col.align_x(iced::Center).padding(VIEW_COL_PADDING).into()
 }
 
 pub(crate) fn info_view(state: &FlashingState) -> Element<'_, BBImagerMessage> {

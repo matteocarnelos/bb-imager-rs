@@ -417,7 +417,7 @@ fn get_device_size(
         )
     }?;
 
-    device_descriptor.size = disk_geometry.DiskSize as u64;
+    device_descriptor.size = Some(disk_geometry.DiskSize as u64);
     device_descriptor.block_size = disk_geometry.Geometry.BytesPerSector;
 
     Ok(())

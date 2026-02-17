@@ -30,7 +30,7 @@ pub struct DeviceDescriptor {
     pub description: String,
     pub error: Option<String>,
     pub partition_table_type: Option<String>,
-    pub size: u64,
+    pub size: Option<u64>,
     pub block_size: u32,
     pub logical_block_size: u32,
     pub mountpoints: Vec<MountPoint>,

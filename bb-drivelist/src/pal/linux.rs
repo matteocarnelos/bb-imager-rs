@@ -10,7 +10,7 @@ struct Devices {
 
 #[derive(Deserialize, Debug)]
 struct Device {
-    size: u64,
+    size: Option<u64>,
     #[serde(default = "Device::name_default")]
     kname: String,
     #[serde(default = "Device::name_default")]
@@ -155,4 +155,75 @@ pub(crate) fn lsblk() -> anyhow::Result<Vec<DeviceDescriptor>> {
     let res: Devices = serde_json::from_slice(&output.stdout).unwrap();
 
     Ok(res.blockdevices.into_iter().map(Into::into).collect())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::DeviceDescriptor;
+
+    #[test]
+    fn loop_dev() {
+        let data = r#"
+        {
+            "blockdevices": [
+                {
+                    "name":"/dev/loop23", 
+                    "kname":"/dev/loop23", 
+                    "path":"/dev/loop23", 
+                    "maj:min":"7:23", 
+                    "fsavail":null, 
+                    "fssize":null, 
+                    "fstype":null, 
+                    "fsused":null, 
+                    "fsuse%":null, 
+                    "mountpoint":null, 
+                    "label":null, 
+                    "uuid":null, 
+                    "ptuuid":null, 
+                    "pttype":null, 
+                    "parttype":null, 
+                    "partlabel":null, 
+                    "partuuid":null, 
+                    "partflags":null, 
+                    "ra":128, 
+                    "ro":false, 
+                    "rm":false, 
+                    "hotplug":false, 
+                    "model":null, 
+                    "serial":null, 
+                    "size":null, 
+                    "state":null, 
+                    "owner":"root", 
+                    "group":"disk", 
+                    "mode":"brw-rw----", 
+                    "alignment":0, 
+                    "min-io":512, 
+                    "opt-io":0, 
+                    "phy-sec":512, 
+                    "log-sec":512, 
+                    "rota":false, 
+                    "sched":"none", 
+                    "rq-size":128, 
+                    "type":"loop", 
+                    "disc-aln":0, 
+                    "disc-gran":4096, 
+                    "disc-max":4294966784, 
+                    "disc-zero":false, 
+                    "wsame":0, 
+                    "wwn":null, 
+                    "rand":false, 
+                    "pkname":null, 
+                    "hctl":null, 
+                    "tran":null, 
+                    "subsystems":"block", 
+                    "rev":null, 
+                    "vendor":null, 
+                    "zoned":"none"
+                }
+            ]
+        }"#;
+
+        let res: super::Devices = serde_json::from_str(data).unwrap();
+        let _: Vec<DeviceDescriptor> = res.blockdevices.into_iter().map(Into::into).collect();
+    }
 }

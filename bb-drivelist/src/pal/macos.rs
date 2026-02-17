@@ -306,8 +306,7 @@ impl DeviceDescriptorFromDiskDescription for DeviceDescriptor {
 
         device.size = disk_description
             .get_number(unsafe { kDADiskDescriptionMediaSizeKey })
-            .map(|n| n.unsignedLongValue())
-            .unwrap_or(0);
+            .map(|n| n.unsignedLongValue());
 
         device.is_readonly = !disk_description
             .get_number(unsafe { kDADiskDescriptionMediaWritableKey })

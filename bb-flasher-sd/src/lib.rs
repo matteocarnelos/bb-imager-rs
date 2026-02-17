@@ -121,7 +121,7 @@ pub fn devices(filter: bool) -> std::collections::HashSet<Device> {
                 true
             }
         })
-        .map(|x| Device::new(x.description, x.raw.into(), x.size))
+        .map(|x| Device::new(x.description, x.raw.into(), x.size.unwrap_or_default()))
         .collect()
 }
 

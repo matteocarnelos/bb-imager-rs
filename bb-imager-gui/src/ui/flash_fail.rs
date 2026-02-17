@@ -4,7 +4,9 @@ use iced::{
 };
 
 use crate::{
-    BBImagerMessage, constants, state::FlashingFailState, ui::helpers::{CircleBar, page_type1, selectable_text}
+    BBImagerMessage, constants,
+    state::FlashingFailState,
+    ui::helpers::{CircleBar, VIEW_COL_PADDING, page_type1, selectable_text},
 };
 
 pub(crate) fn view(state: &FlashingFailState) -> Element<'_, BBImagerMessage> {
@@ -24,7 +26,7 @@ pub(crate) fn progress_view(state: &FlashingFailState) -> Element<'_, BBImagerMe
         widget::text(&state.err)
     ]
     .align_x(iced::Center)
-    .padding(16)
+    .padding(VIEW_COL_PADDING)
     .into()
 }
 

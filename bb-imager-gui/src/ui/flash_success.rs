@@ -4,7 +4,9 @@ use iced::{
 };
 
 use crate::{
-    BBImagerMessage, constants, state::FlashingFinishState, ui::helpers::{CircleBar, board_view_pane, page_type1}
+    BBImagerMessage, constants,
+    state::FlashingFinishState,
+    ui::helpers::{CircleBar, VIEW_COL_PADDING, board_view_pane, page_type1},
 };
 
 pub(crate) fn view(state: &FlashingFinishState) -> Element<'_, BBImagerMessage> {
@@ -30,7 +32,7 @@ pub(crate) fn progress_view(state: &FlashingFinishState) -> Element<'static, BBI
         msg
     ]
     .align_x(iced::Center)
-    .padding(16)
+    .padding(VIEW_COL_PADDING)
     .into()
 }
 

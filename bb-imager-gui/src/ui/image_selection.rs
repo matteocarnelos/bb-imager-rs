@@ -6,7 +6,10 @@ use iced::{
 use crate::{
     constants,
     message::BBImagerMessage,
-    ui::helpers::{self, card_btn_style, detail_entry, page_type1, svg_icon_style},
+    ui::helpers::{
+        self, LIST_COL_PADDING, VIEW_COL_PADDING, card_btn_style, detail_entry, page_type1,
+        svg_icon_style,
+    },
 };
 
 const ICON_WIDTH: u32 = 60;
@@ -109,10 +112,9 @@ fn os_list_pane<'a>(state: &'a crate::state::ChooseOsState) -> Element<'a, BBIma
                     .into_iter()
                     .chain(items),
                 )
-            }
-            .padding(iced::Padding::ZERO.right(12));
+            };
 
-            widget::scrollable(col).into()
+            widget::scrollable(col.padding(LIST_COL_PADDING)).into()
         }
         None => widget::center(
             iced_aw::Spinner::new()
@@ -182,7 +184,7 @@ fn os_view_pane<'a>(state: &'a crate::state::ChooseOsState) -> Element<'a, BBIma
                     .map(Into::into),
             );
 
-            widget::scrollable(col.spacing(16)).into()
+            widget::scrollable(col.spacing(16).padding(VIEW_COL_PADDING)).into()
         }
         None => {
             let col = widget::column![
@@ -209,7 +211,7 @@ fn os_view_pane<'a>(state: &'a crate::state::ChooseOsState) -> Element<'a, BBIma
                 None => col,
             };
 
-            widget::center(widget::scrollable(col)).into()
+            widget::center(widget::scrollable(col.padding(VIEW_COL_PADDING))).into()
         }
     }
 }

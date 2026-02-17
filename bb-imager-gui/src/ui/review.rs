@@ -3,7 +3,12 @@ use iced::{
     widget::{self, text},
 };
 
-use crate::{constants, message::BBImagerMessage, state::CustomizeState, ui::helpers::page_type2};
+use crate::{
+    constants,
+    message::BBImagerMessage,
+    state::CustomizeState,
+    ui::helpers::{VIEW_COL_PADDING, page_type2},
+};
 
 const HEADING_SIZE: u32 = 26;
 
@@ -27,7 +32,7 @@ pub(crate) fn view<'a>(state: &'a CustomizeState) -> Element<'a, BBImagerMessage
 }
 
 fn review_view<'a>(state: &'a CustomizeState) -> Element<'a, BBImagerMessage> {
-    let col = widget::column![
+    let mut col = widget::column![
         text("Write Image")
             .font(constants::FONT_BOLD)
             .size(HEADING_SIZE),
@@ -50,8 +55,8 @@ fn review_view<'a>(state: &'a CustomizeState) -> Element<'a, BBImagerMessage> {
     ];
 
     let modifications = state.modifications();
-    let col = if !modifications.is_empty() {
-        col.extend([
+    if !modifications.is_empty() {
+        col = col.extend([
             widget::rule::horizontal(2).into(),
             text("Modifications to apply")
                 .font(constants::FONT_BOLD)
@@ -60,10 +65,8 @@ fn review_view<'a>(state: &'a CustomizeState) -> Element<'a, BBImagerMessage> {
             widget::column(state.modifications().into_iter().map(Into::into))
                 .spacing(8)
                 .into(),
-        ])
-    } else {
-        col
-    };
+        ]);
+    }
 
-    widget::scrollable(col.spacing(16)).into()
+    widget::scrollable(col.spacing(16).padding(VIEW_COL_PADDING)).into()
 }

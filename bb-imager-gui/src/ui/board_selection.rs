@@ -6,7 +6,7 @@ use iced::{
 use crate::{
     BBImagerMessage,
     state::ChooseBoardState,
-    ui::helpers::{self, svg_icon_style},
+    ui::helpers::{self, LIST_COL_PADDING, VIEW_COL_PADDING, svg_icon_style},
 };
 use crate::{
     constants,
@@ -54,7 +54,7 @@ fn board_list_pane<'a>(state: &'a ChooseBoardState) -> Element<'a, BBImagerMessa
         })
         .map(Into::into);
 
-    widget::scrollable(column(items).padding(iced::Padding::ZERO.right(12))).into()
+    widget::scrollable(column(items).padding(LIST_COL_PADDING)).into()
 }
 
 fn board_view_pane<'a>(state: &'a ChooseBoardState) -> Element<'a, BBImagerMessage> {
@@ -65,6 +65,7 @@ fn board_view_pane<'a>(state: &'a ChooseBoardState) -> Element<'a, BBImagerMessa
                 .font(constants::FONT_BOLD)
                 .size(28),
         )
+        .padding(VIEW_COL_PADDING)
         .into(),
     }
 }

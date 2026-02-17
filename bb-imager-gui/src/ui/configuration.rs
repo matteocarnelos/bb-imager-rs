@@ -7,7 +7,7 @@ use crate::{
     BBImagerMessage,
     helpers::{self, FlashingCustomization},
     persistance,
-    ui::helpers::{element_with_element, element_with_label, page_type2},
+    ui::helpers::{VIEW_COL_PADDING, element_with_element, element_with_label, page_type2},
 };
 
 const INPUT_WIDTH: u32 = 200;
@@ -43,36 +43,42 @@ fn customization_pane<'a>(state: &'a crate::state::CustomizeState) -> Element<'a
 }
 
 fn bcf<'a>(state: &'a persistance::BcfCustomization) -> Element<'a, BBImagerMessage> {
-    widget::toggler(!state.verify)
-        .label("Skip Verification")
-        .on_toggle(|x| {
-            BBImagerMessage::UpdateFlashConfig(FlashingCustomization::Bcf(
-                state.clone().update_verify(!x),
-            ))
-        })
-        .into()
+    widget::container(
+        widget::toggler(!state.verify)
+            .label("Skip Verification")
+            .on_toggle(|x| {
+                BBImagerMessage::UpdateFlashConfig(FlashingCustomization::Bcf(
+                    state.clone().update_verify(!x),
+                ))
+            }),
+    )
+    .padding(VIEW_COL_PADDING)
+    .into()
 }
 
 #[cfg(feature = "pb2_mspm0")]
 fn pb2_mspm0<'a>(state: &'a persistance::Pb2Mspm0Customization) -> Element<'a, BBImagerMessage> {
-    widget::toggler(!state.persist_eeprom)
-        .label("Persist EEPROM")
-        .on_toggle(|x| {
-            BBImagerMessage::UpdateFlashConfig(FlashingCustomization::Pb2Mspm0(
-                state.clone().update_persist_eeprom(x),
-            ))
-        })
-        .into()
+    widget::container(
+        widget::toggler(!state.persist_eeprom)
+            .label("Persist EEPROM")
+            .on_toggle(|x| {
+                BBImagerMessage::UpdateFlashConfig(FlashingCustomization::Pb2Mspm0(
+                    state.clone().update_persist_eeprom(x),
+                ))
+            }),
+    )
+    .padding(VIEW_COL_PADDING)
+    .into()
 }
 
 fn linux_sd_card<'a>(
     state: &'a crate::state::CustomizeState,
     config: &'a persistance::SdSysconfCustomization,
 ) -> Element<'a, BBImagerMessage> {
-    let col = widget::column([]);
+    let mut col = widget::column([]);
 
     // Username and Password
-    let col = col.push(
+    col = col.push(
         widget::toggler(config.user.is_some())
             .label("Configure Username and Password")
             .on_toggle(|t| {
@@ -82,8 +88,8 @@ fn linux_sd_card<'a>(
                 ))
             }),
     );
-    let col = match config.user.as_ref() {
-        Some(usr) => col.extend([
+    if let Some(usr) = config.user.as_ref() {
+        col = col.extend([
             input_with_label(
                 "Username",
                 "username",
@@ -112,14 +118,13 @@ fn linux_sd_card<'a>(
                 false,
             )
             .into(),
-        ]),
-        None => col,
-    };
+        ])
+    }
 
-    let col = col.push(widget::rule::horizontal(2));
+    col = col.push(widget::rule::horizontal(2));
 
     // Wifi
-    let col = col.push(
+    col = col.push(
         widget::toggler(config.wifi.is_some())
             .label("Configure Wireless LAN")
             .on_toggle(|t| {
@@ -129,8 +134,8 @@ fn linux_sd_card<'a>(
                 ))
             }),
     );
-    let col = match config.wifi.as_ref() {
-        Some(wifi) => col.extend([
+    if let Some(wifi) = config.wifi.as_ref() {
+        col = col.extend([
             input_with_label(
                 "SSID",
                 "SSID",
@@ -159,11 +164,10 @@ fn linux_sd_card<'a>(
                 false,
             )
             .into(),
-        ]),
-        None => col,
+        ])
     };
 
-    let col = col.push(widget::rule::horizontal(2));
+    col = col.push(widget::rule::horizontal(2));
 
     // Timezone
     let toggle = widget::toggler(config.timezone.is_some())
@@ -174,7 +178,7 @@ fn linux_sd_card<'a>(
                 config.clone().update_timezone(tz.cloned()),
             ))
         });
-    let col = match config.timezone.as_ref() {
+    col = match config.timezone.as_ref() {
         Some(tz) => {
             let xc = config.clone();
             col.push(element_with_element(
@@ -196,7 +200,7 @@ fn linux_sd_card<'a>(
         None => col.push(toggle),
     };
 
-    let col = col.push(widget::rule::horizontal(2));
+    col = col.push(widget::rule::horizontal(2));
 
     // Hostname
     let toggle = widget::toggler(config.hostname.is_some())
@@ -207,7 +211,7 @@ fn linux_sd_card<'a>(
                 config.clone().update_hostname(hostname),
             ))
         });
-    let col = match config.hostname.as_ref() {
+    col = match config.hostname.as_ref() {
         Some(hostname) => col.push(element_with_element(
             toggle.into(),
             widget::text_input("beagle", hostname)
@@ -222,7 +226,7 @@ fn linux_sd_card<'a>(
         None => col.push(toggle),
     };
 
-    let col = col.push(widget::rule::horizontal(2));
+    col = col.push(widget::rule::horizontal(2));
 
     // Keymap
     let toggle = widget::toggler(config.keymap.is_some())
@@ -237,7 +241,7 @@ fn linux_sd_card<'a>(
                 config.clone().update_keymap(keymap),
             ))
         });
-    let col = match config.keymap.as_ref() {
+    col = match config.keymap.as_ref() {
         Some(keymap) => {
             let xc = config.clone();
 
@@ -260,10 +264,10 @@ fn linux_sd_card<'a>(
         None => col.push(toggle),
     };
 
-    let col = col.push(widget::rule::horizontal(2));
+    col = col.push(widget::rule::horizontal(2));
 
     // SSH Key
-    let col = col.extend([
+    col = col.extend([
         text("SSH authorization public key").into(),
         widget::center(
             widget::text_input("authorized key", config.ssh.as_deref().unwrap_or("")).on_input(
@@ -280,10 +284,10 @@ fn linux_sd_card<'a>(
         .into(),
     ]);
 
-    let col = col.push(widget::rule::horizontal(2));
+    col = col.push(widget::rule::horizontal(2));
 
     // Enable USB DHCP
-    let col = col.push(
+    col = col.push(
         widget::toggler(config.usb_enable_dhcp == Some(true))
             .label("Enable USB DHCP")
             .on_toggle(|x| {
@@ -293,7 +297,7 @@ fn linux_sd_card<'a>(
             }),
     );
 
-    widget::scrollable(col.spacing(16)).into()
+    widget::scrollable(col.spacing(16).padding(VIEW_COL_PADDING)).into()
 }
 
 fn input_with_label<'a, F>(

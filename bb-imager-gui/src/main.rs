@@ -253,6 +253,18 @@ impl BBImager {
             .resolve_remote_subitem(item, target);
     }
 
+    // Resolve remote items and image icons only when in os selection page. nop in other cases.
+    pub(crate) fn resolve_images(&self, target: &[usize]) -> Task<BBImagerMessage> {
+        match self {
+            BBImager::ChooseOs(x) => self.common().resolve_images(x.selected_board, target),
+            BBImager::AppInfo(overlay_state) => match &overlay_state.page {
+                state::OverlayData::ChooseOs(x) => self.common().resolve_images(x.selected_board, target),
+                _ => Task::none(),
+            },
+            _ => Task::none(),
+        }
+    }
+
     fn restart(&mut self) {
         *self = match std::mem::take(self) {
             BBImager::ChooseOs(x) => BBImager::choose_board(x.common),
@@ -509,14 +521,10 @@ impl BBImager {
         };
 
         match self {
-            Self::ChooseOs(inner) => {
-                let subitems_task = inner
-                    .common
-                    .fetch_remote_subitems(inner.selected_board, &[]);
-                let icons_task = inner.common.fetch_os_images(inner.selected_board, &[]);
-
-                Task::batch([subitems_task, icons_task, self.scroll_reset()])
-            }
+            Self::ChooseOs(inner) => Task::batch([
+                inner.common.resolve_images(inner.selected_board, &[]),
+                self.scroll_reset(),
+            ]),
             Self::Review(inner) => match &inner.customization {
                 helpers::FlashingCustomization::LinuxSdSysconfig(c) => {
                     let mut temp = inner

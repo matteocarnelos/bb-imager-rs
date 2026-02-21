@@ -95,84 +95,70 @@ impl BBImagerCommon {
         self.fetch_images(icons)
     }
 
-    pub(crate) fn fetch_os_images(&self, board: usize, target: &[usize]) -> Task<BBImagerMessage> {
-        let Some(os_images) = self.boards.images(board, target) else {
-            return Task::none();
-        };
-
-        // Do not try downloading same image multiple times
-        let icons: HashSet<url::Url> = os_images.map(|(_, x)| x.icon()).cloned().collect();
-
-        self.fetch_images(icons)
-    }
-
-    pub(crate) fn fetch_remote_subitems(
+    /// Expects image at target is not remote sub item
+    fn crawl_image_level(
         &self,
         board: usize,
         target: &[usize],
-    ) -> Task<BBImagerMessage> {
-        let Some(os_images) = self.boards.images(board, target) else {
-            // Maybe resolving was missed
-            if let config::OsListItem::RemoteSubList(item) = self.boards.image(target) {
-                let url = item.subitems_url.clone();
-                tracing::debug!("Downloading subitems from {:?}", url);
+    ) -> (HashSet<url::Url>, Vec<(Vec<usize>, url::Url)>) {
+        let mut icons = HashSet::new();
+        let mut remote_imgs = Vec::new();
 
-                let target_clone: Vec<usize> = target.to_vec();
-                let downloader = self.downloader.clone();
-
-                return Task::perform(
-                    async move { downloader.download_json_no_cache(url).await },
-                    move |x| match x {
-                        Ok(item) => BBImagerMessage::ResolveRemoteSubitemItem {
-                            item,
-                            target: target_clone.clone(),
-                        },
-                        Err(e) => {
-                            tracing::warn!("Failed to download subitems with error {e}");
-                            BBImagerMessage::Null
-                        }
-                    },
-                );
-            } else {
-                return Task::none();
-            }
-        };
-
-        let remote_image_jobs = os_images
-            .filter_map(|(idx, x)| {
-                if let config::OsListItem::RemoteSubList(item) = x {
-                    tracing::debug!("Fetch: {:?} at {}", item.subitems_url, idx);
-                    Some((idx, item.subitems_url.clone()))
-                } else {
-                    None
+        let os_images = self
+            .boards
+            .images(board, target)
+            .expect("Cannot be Remote sublist");
+        for (id, img) in os_images {
+            match img {
+                config::OsListItem::Image(os_image) => {
+                    icons.insert(os_image.icon.clone());
                 }
-            })
-            .map(|(idx, url)| {
-                let mut new_target: Vec<usize> = target.to_vec();
-                new_target.push(idx);
+                config::OsListItem::SubList(os_sub_list) => {
+                    let mut temp_target = target.to_vec();
 
-                let downloader = self.downloader.clone();
-                let url_clone = url.clone();
-                Task::perform(
-                    async move {
-                        downloader
-                            .download_json_no_cache::<Vec<config::OsListItem>, url::Url>(url_clone)
-                            .await
-                    },
-                    move |x| match x {
-                        Ok(item) => BBImagerMessage::ResolveRemoteSubitemItem {
-                            item,
-                            target: new_target.clone(),
-                        },
-                        Err(e) => {
-                            tracing::warn!("Failed to download subitems {:?} with error {e}", url);
-                            BBImagerMessage::Null
-                        }
-                    },
-                )
-            });
+                    temp_target.push(id);
+                    icons.insert(os_sub_list.icon.clone());
 
-        Task::batch(remote_image_jobs)
+                    let (temp_icons, mut temp_remote_imgs) =
+                        self.crawl_image_level(board, &temp_target);
+
+                    icons.extend(temp_icons);
+                    remote_imgs.append(&mut temp_remote_imgs);
+                }
+                config::OsListItem::RemoteSubList(os_remote_sub_list) => {
+                    let mut temp_target = target.to_vec();
+
+                    temp_target.push(id);
+                    icons.insert(os_remote_sub_list.icon.clone());
+
+                    remote_imgs.push((temp_target, os_remote_sub_list.icon.clone()));
+                }
+            }
+        }
+
+        (icons, remote_imgs)
+    }
+
+    // Try to resolve all images (including remote images in sublists)
+    pub(crate) fn resolve_images(&self, board: usize, target: &[usize]) -> Task<BBImagerMessage> {
+        let (icons, remote_imgs) = self.crawl_image_level(board, target);
+
+        let icon_task = self.fetch_images(icons);
+        let remote_img_task = remote_imgs.into_iter().map(|(id, u)| {
+            let downloader = self.downloader.clone();
+            Task::perform(
+                async move { downloader.download_json_no_cache(u).await },
+                move |x| match x {
+                    Ok(item) => BBImagerMessage::ResolveRemoteSubitemItem { item, target: id },
+                    Err(e) => {
+                        tracing::warn!("Failed to download subitems with error {e}");
+                        BBImagerMessage::Null
+                    }
+                },
+            )
+        });
+
+        Task::batch(remote_img_task.chain([icon_task]))
     }
 }
 

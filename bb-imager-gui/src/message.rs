@@ -147,7 +147,8 @@ pub(crate) fn update(state: &mut BBImager, message: BBImagerMessage) -> Task<BBI
             return state.fetch_board_images();
         }
         BBImagerMessage::ResolveRemoteSubitemItem { item, target } => {
-            state.resolve_remote_subitem(item, &target)
+            state.resolve_remote_subitem(item, &target);
+            return state.resolve_images(&target);
         }
         BBImagerMessage::UpdateAvailable(x) => {
             return show_notification(format!("A new version of application is available {}", x));

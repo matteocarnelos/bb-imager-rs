@@ -131,7 +131,7 @@ impl BBImagerCommon {
                     temp_target.push(id);
                     icons.insert(os_remote_sub_list.icon.clone());
 
-                    remote_imgs.push((temp_target, os_remote_sub_list.icon.clone()));
+                    remote_imgs.push((temp_target, os_remote_sub_list.subitems_url.clone()));
                 }
             }
         }
